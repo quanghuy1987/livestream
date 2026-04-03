@@ -57,6 +57,7 @@ The API is now live at **http://localhost:8080**.
 ### 3. Verify it's running
 
 ```bash
+# Must use an audience token — streamer tokens are rejected with 403
 curl http://localhost:8080/audience/livestreams \
   -H "Authorization: Bearer audience-token-1"
 ```
@@ -253,11 +254,11 @@ Exceeding the limit returns `429`:
 | `POST` | `/streamer/go_live` | streamer | Start streaming |
 | `POST` | `/streamer/close_room` | streamer | End the stream |
 | `GET` | `/streamer/my_room` | streamer | Get current active room |
-| `GET` | `/audience/livestreams` | any | List streams (paginated) |
-| `GET` | `/audience/livestreams/{id}` | any | Get stream details |
-| `POST` | `/audience/livestreams/{id}/join` | any | Join a stream |
-| `POST` | `/audience/livestreams/{id}/leave` | any | Leave a stream |
-| `GET` | `/audience/livestreams/{id}/stats` | any | Get viewer stats |
+| `GET` | `/audience/livestreams` | audience | List streams (paginated) |
+| `GET` | `/audience/livestreams/{id}` | audience | Get stream details |
+| `POST` | `/audience/livestreams/{id}/join` | audience | Join a stream |
+| `POST` | `/audience/livestreams/{id}/leave` | audience | Leave a stream |
+| `GET` | `/audience/livestreams/{id}/stats` | audience | Get viewer stats |
 
 Full API documentation: see [API_DOCS.md](API_DOCS.md) or import `postman/livestream.postman_collection.json` into Postman.
 
