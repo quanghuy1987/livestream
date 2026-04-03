@@ -18,6 +18,7 @@ use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\IdempotencyMiddleware;
 use App\Http\Middleware\MiddlewarePipeline;
 use App\Http\Middleware\RateLimitMiddleware;
+use App\Http\Middleware\RoleMiddleware;
 use App\Http\Router;
 use App\Infrastructure\Idempotency\MySQLIdempotencyStore;
 use App\Infrastructure\Logging\MySQLAuditLogger;
@@ -75,7 +76,9 @@ $audienceController = new AudienceController(
 );
 
 // ── Middleware ────────────────────────────────────────────────────────────────
-$authMiddleware = new AuthMiddleware($userRepo);
+$authMiddleware    = new AuthMiddleware($userRepo);
+$streamerOnly      = new RoleMiddleware('streamer');
+$audienceOnly      = new RoleMiddleware('audience');
 
 // ── Router ────────────────────────────────────────────────────────────────────
 $router = new Router();
@@ -100,48 +103,57 @@ $route = function (callable $handler, array $extra = []) use ($authMiddleware, $
 $router->add('POST', '/streamer/start_room', $route(
     [$streamerController, 'startRoom'],
     [
+        $streamerOnly,
         new RateLimitMiddleware($rateLimiter, 'start_room', 5, 60),
         new IdempotencyMiddleware($idemStore, 'start_room'),
     ]
 ));
 
 $router->add('POST', '/streamer/go_live', $route(
-    [$streamerController, 'goLive']
+    [$streamerController, 'goLive'],
+    [$streamerOnly]
 ));
 
 $router->add('POST', '/streamer/close_room', $route(
     [$streamerController, 'closeRoom'],
     [
+        $streamerOnly,
         new IdempotencyMiddleware($idemStore, 'close_room'),
     ]
 ));
 
 $router->add('GET', '/streamer/my_room', $route(
-    [$streamerController, 'myRoom']
+    [$streamerController, 'myRoom'],
+    [$streamerOnly]
 ));
 
 // Audience routes
 $router->add('GET', '/audience/livestreams', $route(
-    [$audienceController, 'list']
+    [$audienceController, 'list'],
+    [$audienceOnly]
 ));
 
 $router->add('GET', '/audience/livestreams/{id}', $route(
-    [$audienceController, 'show']
+    [$audienceController, 'show'],
+    [$audienceOnly]
 ));
 
 $router->add('POST', '/audience/livestreams/{id}/join', $route(
     [$audienceController, 'join'],
     [
+        $audienceOnly,
         new RateLimitMiddleware($rateLimiter, 'join', 20, 1),
     ]
 ));
 
 $router->add('POST', '/audience/livestreams/{id}/leave', $route(
-    [$audienceController, 'leave']
+    [$audienceController, 'leave'],
+    [$audienceOnly]
 ));
 
 $router->add('GET', '/audience/livestreams/{id}/stats', $route(
-    [$audienceController, 'stats']
+    [$audienceController, 'stats'],
+    [$audienceOnly]
 ));
 
 return $router;
