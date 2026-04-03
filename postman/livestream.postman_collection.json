@@ -1,0 +1,133 @@
+{
+  "info": {
+    "name": "Livestreaming Backend API",
+    "description": "API collection for the Livestreaming Platform backend service.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080" },
+    { "key": "streamer_token_1", "value": "streamer-token-1" },
+    { "key": "streamer_token_2", "value": "streamer-token-2" },
+    { "key": "audience_token_1", "value": "audience-token-1" },
+    { "key": "livestream_id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Streamer",
+      "item": [
+        {
+          "name": "Start Room",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{streamer_token_1}}" },
+              { "key": "Content-Type",  "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}", "description": "Optional: prevents duplicate rooms on retry" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My First Livestream\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/streamer/start_room", "host": ["{{base_url}}"], "path": ["streamer","start_room"] }
+          }
+        },
+        {
+          "name": "Go Live",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{streamer_token_1}}" }
+            ],
+            "url": { "raw": "{{base_url}}/streamer/go_live", "host": ["{{base_url}}"], "path": ["streamer","go_live"] }
+          }
+        },
+        {
+          "name": "Close Room",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{streamer_token_1}}" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}", "description": "Optional: prevents duplicate close operations" }
+            ],
+            "url": { "raw": "{{base_url}}/streamer/close_room", "host": ["{{base_url}}"], "path": ["streamer","close_room"] }
+          }
+        },
+        {
+          "name": "Get My Room",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{streamer_token_1}}" }
+            ],
+            "url": { "raw": "{{base_url}}/streamer/my_room", "host": ["{{base_url}}"], "path": ["streamer","my_room"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audience",
+      "item": [
+        {
+          "name": "List Livestreams",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{audience_token_1}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/audience/livestreams?page=1&limit=20&status=LIVE&sort=viewer_count",
+              "host": ["{{base_url}}"],
+              "path": ["audience","livestreams"],
+              "query": [
+                { "key": "page",   "value": "1" },
+                { "key": "limit",  "value": "20" },
+                { "key": "status", "value": "LIVE" },
+                { "key": "sort",   "value": "viewer_count" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Livestream Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{audience_token_1}}" }
+            ],
+            "url": { "raw": "{{base_url}}/audience/livestreams/{{livestream_id}}", "host": ["{{base_url}}"], "path": ["audience","livestreams","{{livestream_id}}"] }
+          }
+        },
+        {
+          "name": "Join Livestream",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{audience_token_1}}" }
+            ],
+            "url": { "raw": "{{base_url}}/audience/livestreams/{{livestream_id}}/join", "host": ["{{base_url}}"], "path": ["audience","livestreams","{{livestream_id}}","join"] }
+          }
+        },
+        {
+          "name": "Leave Livestream",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{audience_token_1}}" }
+            ],
+            "url": { "raw": "{{base_url}}/audience/livestreams/{{livestream_id}}/leave", "host": ["{{base_url}}"], "path": ["audience","livestreams","{{livestream_id}}","leave"] }
+          }
+        },
+        {
+          "name": "Get Livestream Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{audience_token_1}}" }
+            ],
+            "url": { "raw": "{{base_url}}/audience/livestreams/{{livestream_id}}/stats", "host": ["{{base_url}}"], "path": ["audience","livestreams","{{livestream_id}}","stats"] }
+          }
+        }
+      ]
+    }
+  ]
+}
